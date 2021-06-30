@@ -3,10 +3,6 @@ kind: Config
 metadata:
   name: integration
 
-build:
-  local:
-    useBuildkit: true
-
 deploy:
   logs:
     prefix: auto
@@ -14,15 +10,20 @@ deploy:
     manifests: []
 
 profiles:
+  # local: never push to remote registries
+  - name: local
+    build:
+      local:
+        push: false
+
   # integration: set of `skaffold debug`-like integration tests
   - name: integration
     build:
       artifacts:
       - image: kubectl
         context: kubectl
-        docker:
-          buildArgs:
-            GOVERSION: 1.16
+        custom:
+          buildCommand: ../../dockerbuild.sh --build-arg=GOVERSION=1.16
     deploy:
       kubectl:
         manifests:
